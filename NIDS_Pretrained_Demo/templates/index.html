@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Zero-Day Intrusion Detection System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Premium Cybersecurity Colors */
+            --bg: #F8FAFC;
+            --sidebar-bg: #D9EAFD;
+            --glass-bg: #FFFFFF;
+            --glass-border: rgba(0, 0, 0, 0.05);
+            
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --text-muted: #64748B;
+            
+            /* Detection Colors */
+            --accent-green: #22c55e;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            
+            /* Premium Accents */
+            --accent-deep-blue: #1E293B;
+            --accent-teal: #BCCCDC;
+            --accent-electric: #3b82f6;
+
+            --row-normal: rgba(34, 197, 94, 0.1);
+            --row-suspicious: rgba(245, 158, 11, 0.1);
+            --row-attack: rgba(239, 68, 68, 0.1);
+            
+            --row-normal-hover: rgba(34, 197, 94, 0.15);
+            --row-suspicious-hover: rgba(245, 158, 11, 0.15);
+            --row-attack-hover: rgba(239, 68, 68, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        
+        body { background-color: var(--bg); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+
+        /* Layout */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 2rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            border-right: 1px solid rgba(0,0,0,0.04);
+        }
+        
+        .sidebar h2 { font-size: 1.05rem; color: #1E293B; margin-bottom: 2rem; padding-left: 10px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.4; }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #64748B;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover:not(.active) { color: #1E293B; background: rgba(255,255,255,0.6); }
+        .nav-item.active { background: #BCCCDC; color: #1E293B; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-weight: 700; }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: calc(100vw - 250px);
+        }
+
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: #FFFFFF;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+        .glass-card:hover { filter: brightness(1.05); }
+
+        /* Top Header */
+        header.top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 2.5rem;
+            background: rgba(255, 255, 255, 0.4); border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+        }
+
+        h1 { 
+            font-size: 1.35rem; font-weight: 700; color: var(--accent-deep-blue); 
+            display: flex; align-items: center; gap: 12px; letter-spacing: -0.02em;
+        }
+
+        .pulse-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            background-color: var(--accent-green);
+            animation: pulseGreen 2s infinite;
+        }
+        .pulse-dot.stopped {
+            background-color: var(--text-muted); animation: none; box-shadow: none;
+        }
+
+        @keyframes pulseGreen {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .control-row {
+            display: flex; gap: 15px; align-items: center; padding: 1rem 1.5rem; justify-content: space-between; margin-bottom: 1.5rem;
+        }
+
+        .control-row > * {
+            flex: 1;
+            text-align: center;
+        }
+
+        select {
+            background: #FFFFFF; border: 1px solid var(--glass-border); color: #1E293B;
+            padding: 10px 14px; border-radius: 10px; outline: none; font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            height: 42px;
+        }
+
+        .file-upload-label {
+            background: #BCCCDC; border: 1px dashed transparent; color: #1E293B;
+            padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; font-weight: 600; 
+            height: 42px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin: 0;
+        }
+        .file-upload-label:hover { opacity: 0.85; transform: translateY(-1px); }
+        input[type="file"] { display: none; }
+
+        button {
+            border: none; padding: 10px 20px; border-radius: 10px; height: 42px;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2); color: white; display: flex; align-items: center; justify-content: center;
+        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        button:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+        
+        button.btn-neutral { background-color: #BCCCDC; color: #1E293B; }
+        
+        button.btn-start { background-color: var(--accent-green); }
+
+        /* Content Wrapper */
+        .content-wrapper { padding: 2.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+        
+        .nav-section { display: none; animation: fadeIn 0.3s ease-in-out;}
+        .nav-section.active-section { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Dashboard Cards */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 0.5rem; }
+        .dashboard-grid .glass-card { padding: 1.5rem; }
+        .dashboard-grid h3 { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 0.75rem; }
+        .dashboard-grid .value { font-size: 2.5rem; font-weight: 700; color: var(--accent-deep-blue); letter-spacing: -0.02em; }
+
+        .card-border-green h3::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-green); margin-right: 8px; }
+        .card-border-red h3::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-red); margin-right: 8px; box-shadow: 0 0 6px var(--accent-red);}
+        .card-border-neutral h3::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-electric); margin-right: 8px; }
+
+        /* Table Area */
+        .log-container { padding: 0; overflow: hidden; height: 500px; display: flex; flex-direction: column; margin-bottom: 1.5rem; }
+        .table-header {
+            display: grid; grid-template-columns: 1fr 2fr 1.5fr 3fr 1.5fr 1fr;
+            padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(0,0,0,0.05); 
+            color: var(--text-secondary); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        .log-entries { overflow-y: auto; flex-grow: 1; padding: 0.5rem; display: flex; flex-direction: column; gap: 6px; }
+        .log-entries::-webkit-scrollbar { width: 6px; }
+        .log-entries::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+
+        /* Rows */
+        .log-row {
+            display: grid; grid-template-columns: 1fr 2fr 1.5fr 3fr 1.5fr 1fr; gap: 1rem;
+            border-radius: 8px; border: 1px solid transparent;
+            padding: 12px 16px; align-items: center; font-size: 0.85rem; color: var(--text-primary);
+            transition: all 0.2s ease; position: relative;
+        }
+        .row-Low { background: var(--row-normal); }
+        .row-Medium { background: var(--row-suspicious); }
+        .row-High { background: var(--row-attack); }
+        .row-Low:hover { background: var(--row-normal-hover); }
+        .row-Medium:hover { background: var(--row-suspicious-hover); }
+        .row-High:hover { background: var(--row-attack-hover); }
+
+        .mono { font-family: 'Roboto Mono', monospace; font-size: 0.8rem;}
+        .text-id { color: var(--text-secondary); font-weight: 500; }
+        .text-ip { color: var(--text-secondary); }
+
+        .explanation { color: var(--text-secondary); font-size: 0.8rem; line-height: 1.4; display: block;}
+
+        .status-pill { 
+            padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; 
+            text-align: center; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;
+        }
+        .pill-Low { background: rgba(34, 197, 94, 0.15); color: #166534; }
+        .pill-Medium { background: rgba(245, 158, 11, 0.15); color: #92400e; }
+        .pill-High { background: rgba(239, 68, 68, 0.15); color: #991b1b; }
+
+        .prog-bar-bg { width: 100%; height: 6px; background: rgba(0,0,0,0.06); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+        .prog-bar-fill { height: 100%; transition: width 0.3s; }
+        .fill-Low { background: var(--accent-green); }
+        .fill-Medium { background: var(--accent-amber); }
+        .fill-High { background: var(--accent-red); }
+        
+        .score-val { font-weight: 600; font-size: 0.8rem; }
+        .score-Low { color: #166534; }
+        .score-Medium { color: #92400e; }
+        .score-High { color: #991b1b; }
+
+        .flex-col { display: flex; flex-direction: column; gap: 2px;}
+
+        /* Tooltip style */
+        .tooltip-data {
+            display: none; position: absolute; z-index: 100; left: 50%; transform: translateX(-50%); top: -90%;
+            background: #FFFFFF; border: 1px solid var(--glass-border); color: #1E293B;
+            padding: 12px 16px; border-radius: 8px; font-size: 0.75rem; width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: left;
+        }
+        .log-row:hover { z-index: 10; }
+        .log-row:hover .tooltip-data { display: block; }
+        
+        .pagination-controls {
+            display: flex; justify-content: center; gap: 16px; align-items: center; padding: 14px;
+            background: transparent; border-top: 1px solid rgba(0,0,0,0.04);
+        }
+        .pagination-controls button {
+            background: #FFFFFF; color: #1E293B; border: 1px solid var(--glass-border); box-shadow: none; width: auto; font-weight: 500;
+        }
+        .pagination-controls button:hover:not(:disabled) { background: #F8FAFC; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .pagination-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Analytics Specific */
+        .chart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem;}
+        
+        .chart-card {
+            padding: 1.25rem; position: relative; height: 260px; max-height: 280px; transition: transform 0.2s ease, box-shadow 0.2s ease; display: flex; flex-direction: column;
+        }
+        .chart-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
+        .chart-card h4 { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.05em; font-weight: 600; flex-shrink: 0;}
+        
+        .canvas-wrapper { position: relative; flex-grow: 1; width: 100%; overflow: hidden; }
+        .canvas-wrapper canvas { height: 250px !important; width: 100% !important; }
+        
+        .no-anomalies {
+            padding: 1.5rem; background: rgba(34, 197, 94, 0.05); border: 1px dashed rgba(34, 197, 94, 0.4);
+            color: #166534; border-radius: 12px; text-align: center; font-weight: 500; margin-bottom: 1.5rem;
+        }
+        
+        /* Reports Specific Text */
+        .report-block h3 { margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.05rem; color: var(--accent-deep-blue); }
+        .report-block p, .report-block ul { margin-bottom: 1rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary); }
+        .report-block ul { margin-left: 2rem; }
+
+    </style>
+</head>
+<body>
+
+<div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2>Zero-Day Detection Dashboard</h2>
+        <div class="nav-item active" onclick="switchSection('dashboard-section', this)">Dashboard</div>
+        <div class="nav-item" onclick="switchSection('reports-section', this)">Reports</div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        
+        <header class="top-bar">
+            <div>
+                <h1><div class="pulse-dot" id="statusDot"></div> AI-Driven Zero-Day Intrusion Detection System</h1>
+                <p style="color: var(--accent-deep-blue); font-weight: 600; font-size: 0.95rem; margin-top: 8px;">Time-Series Network Traffic Analysis Engine</p>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px;">Detecting unknown cyber threats using AI-driven anomaly detection on network traffic patterns.</p>
+            </div>
+        </header>
+
+        <div class="content-wrapper">
+            
+            <!-- SECTION: SINGLE-PAGE DASHBOARD -->
+            <div id="dashboard-section" class="nav-section active-section">
+                
+                <!-- Horizontal Control Row -->
+                <div class="glass-card control-row">
+                    <select id="interfaceSelect">
+                        <option value="default">Default Interface</option>
+                    </select>
+                    
+                    <label class="file-upload-label" id="uploadLabel">
+                        Upload PCAP
+                        <input type="file" id="pcapInput" accept=".pcap">
+                    </label>
+                    
+                    <button class="btn-neutral" id="dlPcapBtn" onclick="window.location.href='/api/download_pcap'">Download PCAP</button>
+                    
+                    <button class="btn-start" id="captureBtn" onclick="toggleCapture()">Start Capture</button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="dashboard-grid">
+                    <div class="glass-card card-border-neutral">
+                        <h3>Total Packets Scanned</h3>
+                        <div class="value" id="kpi-total">0</div>
+                    </div>
+                    <div class="glass-card card-border-green">
+                        <h3>Normal Traffic</h3>
+                        <div class="value" id="kpi-safe">0</div>
+                    </div>
+                    <div class="glass-card card-border-red">
+                        <h3>Attack Traffic</h3>
+                        <div class="value" id="kpi-threats">0</div>
+                    </div>
+                </div>
+
+                <!-- Packet Table (LIVE DATA) -->
+                <div class="glass-card log-container">
+                    <div class="table-header">
+                        <div>Packet ID</div>
+                        <div>Source &rarr; Destination</div>
+                        <div>Protocol & Length</div>
+                        <div>Analysis</div>
+                        <div>Anomaly Score</div>
+                        <div style="text-align: right;">Risk Level</div>
+                    </div>
+                    
+                    <div class="log-entries" id="logEntries"></div>
+
+                    <div class="pagination-controls">
+                        <button id="prevPageBtn" onclick="changePage(-1)" disabled>Previous Page</button>
+                        <span id="pageIndicator" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">Page 1 of 1</span>
+                        <button id="nextPageBtn" onclick="changePage(1)" disabled>Next Page</button>
+                    </div>
+                </div>
+                
+                <!-- Analytics Section -->
+                <div id="analyticsSection" style="display: none;">
+                    <div id="noAnomaliesMsg" class="no-anomalies" style="display: none;">
+                        No anomalous activity detected during this session.
+                    </div>
+                    
+                    <div class="chart-grid" id="chartGrid">
+                        <div class="glass-card chart-card">
+                            <h4>Risk level distribution</h4>
+                            <div class="canvas-wrapper">
+                                <canvas id="riskChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="glass-card chart-card">
+                            <h4>Protocol distribution (Anomalies)</h4>
+                            <div class="canvas-wrapper">
+                                <canvas id="protocolChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="glass-card chart-card">
+                            <h4>Anomaly Score Trend</h4>
+                            <div class="canvas-wrapper">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="glass-card chart-card">
+                            <h4>Top Source IPs</h4>
+                            <div class="canvas-wrapper">
+                                <canvas id="ipChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div> <!-- End Dashboard Section -->
+
+            <!-- SECTION: REPORTS -->
+            <div id="reports-section" class="nav-section">
+                <div class="glass-card report-block" style="padding: 2.5rem;">
+                    
+                    <h2 style="font-size: 1.5rem; color: var(--accent-deep-blue); margin-bottom: 1.5rem; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom:10px;">Detection Report & Analysis</h2>
+                    
+                    <h3>Model Explanation</h3>
+                    <p>This system uses a time-series based detection approach inspired by LSTM behavior to analyze sequential packet patterns. It profiles standard flow rhythms allowing adaptive detection against undefined Zero-Day style shifts in structure.</p>
+                    
+                    <h3>Detection Logic</h3>
+                    <p>Analysis evaluates traffic through sliding windows dynamically scoring properties:</p>
+                    <ul>
+                        <li><strong>Feature Extraction:</strong> IP, protocol distributions, size variations, and communication frequency natively collected via Scapy.</li>
+                        <li><strong>Sliding Window Analysis:</strong> Historical baselines calculated instantly aggregating packets iteratively without memory leaks.</li>
+                        <li><strong>Anomaly Scoring System:</strong> Non-intrusive scaling producing dynamic risk percentage (0 to 100), triggering heuristic alert bands natively mapped back against network flow matrices.</li>
+                    </ul>
+
+                    <h3>Attack Analysis</h3>
+                    <p>For anomalous packets identified during this session, potential threats include definitions across standard vectors:</p>
+                    <ul>
+                        <li><strong>Port Scanning:</strong> Vertical or horizontal sweeps attempting service identification.</li>
+                        <li><strong>Flooding (DoS):</strong> Influx algorithms overloading destination architecture logic.</li>
+                        <li><strong>Abnormal UDP Traffic:</strong> Volumetric anomaly thresholds breached violating standard application protocol bounds.</li>
+                        <li><strong>Suspicious Protocol Behavior:</strong> Irregular sequence timing and size mutations.</li>
+                    </ul>
+
+                    <h3>Behavior Explanation</h3>
+                    <p><em>Example:</em> "High anomaly score detected due to irregular packet frequency and unusual port usage, indicating potential scanning or flooding activity."</p>
+
+                    <h3 style="margin-top: 2rem; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 1rem;">Summary Section</h3>
+                    <p><strong>Total Packets Analyzed:</strong> <span id="report-total" style="color:var(--accent-electric); font-weight:bold;">0</span></p>
+                    <p><strong>Total Anomalies Detected:</strong> <span id="report-threats" style="color:var(--accent-red); font-weight:bold;">0</span></p>
+                    <p><strong>Clean Connections:</strong> <span id="report-safe" style="color:var(--accent-green); font-weight:bold;">0</span></p>
+
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+</div>
+
+<script>
+    let isCapturing = false; 
+    let scanInterval;
+    let currentPage = 1;
+    let limitPerPage = 100;
+    let chartInstances = {};
+    
+    // SPA Sidebar Navigation Logic
+    function switchSection(sectionId, element=null) {
+        document.querySelectorAll('.nav-section').forEach(sec => sec.classList.remove('active-section'));
+        document.getElementById(sectionId).classList.add('active-section');
+        
+        if (element) {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            element.classList.add('active');
+        }
+    }
+
+    function syncReportStats(total, safe, threats) {
+        document.getElementById('report-total').innerText = total;
+        document.getElementById('report-safe').innerText = safe;
+        document.getElementById('report-threats').innerText = threats;
+    }
+
+    document.addEventListener("DOMContentLoaded", loadAnalytics);
+
+    window.onload = async () => {
+        try {
+            const res = await fetch('/api/interfaces');
+            const data = await res.json();
+            if(data.status === "success") {
+                const select = document.getElementById('interfaceSelect');
+                select.innerHTML = '';
+                data.interfaces.forEach(iface => {
+                    const opt = document.createElement('option');
+                    opt.value = iface; opt.innerText = iface;
+                    select.appendChild(opt);
+                });
+            }
+        } catch(e) {}
+        loopScan(); 
+    }
+
+    document.getElementById('pcapInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+
+        if(isCapturing) {
+            await fetch('/api/stop_capture', { method: 'POST' });
+            isCapturing = false;
+            updateButtonToStart();
+        }
+        
+        document.getElementById('uploadLabel').innerText = "Uploading...";
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const res = await fetch('/api/upload_pcap', { method: 'POST', body: formData });
+            const data = await res.json();
+            
+            if(data.status === "success") {
+                currentPage = 1;
+                fetchPacketsPage();
+                
+                let safe = 0; let threats = 0;
+                data.results.forEach(packet => {
+                    if(packet.is_threat) threats++;
+                    else safe++;
+                });
+                
+                document.getElementById('kpi-total').innerText = data.results.length;
+                document.getElementById('kpi-safe').innerText = safe;
+                document.getElementById('kpi-threats').innerText = threats;
+                
+                syncReportStats(data.results.length, safe, threats);
+
+                // Ensure Dashboard is visible
+                document.getElementById('analyticsSection').style.display = 'block';
+                loadAnalytics(); 
+                
+            } else {
+                alert("Upload failed: " + data.message);
+            }
+        } catch(err) {
+            console.error(err);
+            alert("Error parsing PCAP.");
+        } finally {
+            document.getElementById('uploadLabel').innerHTML = `Upload PCAP <input type="file" id="pcapInput" accept=".pcap">`;
+            document.getElementById('pcapInput').addEventListener('change', arguments.callee);
+        }
+    });
+
+    function updateButtonToStop() {
+        const button = document.getElementById('captureBtn');
+        if (button) {
+            button.innerText = "Stop Capture";
+            button.style.backgroundColor = "#ef4444";
+        }
+        document.getElementById('interfaceSelect').disabled = true;
+        document.getElementById('statusDot').classList.remove('stopped');
+    }
+
+    function updateButtonToStart() {
+        const button = document.getElementById('captureBtn');
+        if (button) {
+            button.innerText = "Start Capture";
+            button.style.backgroundColor = "#22c55e";
+        }
+        document.getElementById('interfaceSelect').disabled = false;
+        document.getElementById('statusDot').classList.add('stopped');
+    }
+
+    async function toggleCapture() {
+        const button = document.getElementById('captureBtn');
+        try {
+            button.disabled = true;
+            
+            if (!isCapturing) {
+                button.innerText = "Starting...";
+                const interface = document.getElementById('interfaceSelect').value;
+                const res = await fetch('/api/start_capture', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ interface })
+                });
+                
+                const data = await res.json();
+                if (data.status === "started" || data.status === "already_running") {
+                    isCapturing = true;
+                    updateButtonToStop();
+                    
+                    document.getElementById('analyticsSection').style.display = 'none';
+                    if (data.status === "started") {
+                        currentPage = 1;
+                        document.getElementById('logEntries').innerHTML = "";
+                    }
+                }
+            } else {
+                button.innerText = "Stopping...";
+                await fetch('/api/stop_capture', { method: 'POST' });
+                isCapturing = false;
+                updateButtonToStart();
+                
+                document.getElementById('analyticsSection').style.display = 'block';
+                loadAnalytics();
+            }
+        } catch (error) {
+            console.error("Capture error:", error);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
+    function renderPacketRow(packet) {
+        const logs = document.getElementById('logEntries');
+        const row = document.createElement('div');
+        const bgClass = `row-${packet.risk_level}`;
+        row.className = `log-row ${bgClass}`; 
+        
+        let badgeText = packet.risk_level === "Low" ? "NORMAL" : packet.risk_level === "Medium" ? "SUSPICIOUS" : "ATTACK";
+
+        row.innerHTML = `
+            <div class="tooltip-data">
+                <strong>Detection Reason:</strong><br/>
+                ${packet.reason}
+            </div>
+            <div class="mono text-id">${packet.packet_id}</div>
+            <div class="mono text-ip flex-col">
+                <span>${packet.src_ip}:${packet.src_port || 'N/A'}</span>
+                <span style="color:var(--text-muted); font-size: 0.75rem;">&rarr; ${packet.dst_ip}:${packet.dst_port || 'N/A'}</span>
+            </div>
+            <div style="font-size:0.8rem; font-weight: 500;">${packet.protocol}<br/><span style="color:var(--text-muted); font-weight: normal;">${packet.length} bytes</span></div>
+            <div class="explanation">${packet.analysis}</div>
+            <div class="flex-col" style="align-items: flex-start; justify-content: center;">
+                <span class="score-val score-${packet.risk_level}">${packet.anomaly_score}</span>
+                <div class="prog-bar-bg">
+                    <div class="prog-bar-fill fill-${packet.risk_level}" style="width: ${packet.anomaly_score}%;"></div>
+                </div>
+            </div>
+            <div class="flex-col" style="text-align: right; align-items: flex-end; justify-content: center;">
+                <span class="status-pill pill-${packet.risk_level}">${badgeText}</span>
+            </div>
+        `;
+        
+        logs.appendChild(row);
+    }
+
+    function changePage(delta) {
+        currentPage += delta;
+        if (currentPage < 1) currentPage = 1;
+        fetchPacketsPage();
+    }
+
+    async function fetchPacketsPage() {
+        try {
+            const res = await fetch(`/api/get_packets?page=${currentPage}&limit=${limitPerPage}`);
+            const data = await res.json();
+            
+            if (data.status === "success") {
+                document.getElementById('pageIndicator').innerText = `Page ${data.page} of ${data.total_pages}`;
+                
+                const logs = document.getElementById('logEntries');
+                logs.innerHTML = "";
+                
+                data.packets.forEach(packet => {
+                    renderPacketRow(packet);
+                });
+                
+                document.getElementById('prevPageBtn').disabled = data.page <= 1;
+                document.getElementById('nextPageBtn').disabled = data.page >= data.total_pages;
+            }
+        } catch(e) { console.error("Fetch Page Error:", e); }
+    }
+
+    async function loopScan() {
+        try {
+            const res = await fetch('/api/live_scan');
+            const data = await res.json();
+            
+            if(data.is_capturing && !isCapturing) {
+                isCapturing = true;
+                updateButtonToStop();
+            } else if (!data.is_capturing && isCapturing) {
+                isCapturing = false;
+                updateButtonToStart();
+            }
+
+            document.getElementById('kpi-total').innerText = data.stats.total_packets;
+            document.getElementById('kpi-safe').innerText = data.stats.safe_packets;
+            document.getElementById('kpi-threats').innerText = data.stats.threat_packets;
+            syncReportStats(data.stats.total_packets, data.stats.safe_packets, data.stats.threat_packets);
+
+            if (currentPage === 1 && isCapturing) {
+                await fetchPacketsPage();
+            }
+
+            scanInterval = setTimeout(loopScan, 1000);
+
+        } catch(e) { console.error("Poll Error:", e); scanInterval = setTimeout(loopScan, 2000); }
+    }
+
+    function setupGradients(ctx) {
+        let gradGreen = ctx.createLinearGradient(0, 0, 0, 250);
+        gradGreen.addColorStop(0, '#22c55e');
+        gradGreen.addColorStop(1, '#16a34a');
+
+        let gradRed = ctx.createLinearGradient(0, 0, 0, 250);
+        gradRed.addColorStop(0, '#ef4444');
+        gradRed.addColorStop(1, '#dc2626');
+        
+        let gradFill = ctx.createLinearGradient(0, 0, 0, 240);
+        gradFill.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+        gradFill.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+        
+        return { gradGreen, gradRed, gradFill };
+    }
+
+    let riskChart, protocolChart, trendChart, ipChart;
+
+    async function loadAnalytics() {
+        try {
+            const res = await fetch("/api/analytics");
+            const data = await res.json();
+            
+            console.log("Analytics Data:", data);
+
+            if (!data || Object.keys(data).length === 0) {
+                console.error("No data received from backend");
+                return;
+            }
+
+            const section = document.getElementById('analyticsSection');
+            if(section) section.style.display = 'block';
+
+            renderCharts(data);
+
+        } catch (err) {
+            console.error("Error loading analytics:", err);
+        }
+    }
+
+    function renderCharts(data) {
+        
+        // Destroy old charts safely
+        [riskChart, protocolChart, trendChart, ipChart].forEach(chart => {
+            if (chart) chart.destroy();
+        });
+
+        // RISK DISTRIBUTION
+        const riskCtx = document.getElementById("riskChart")?.getContext("2d");
+
+        if (riskCtx) {
+            riskChart = new Chart(riskCtx, {
+                type: "bar",
+                data: {
+                    labels: ["Normal", "Suspicious", "Attack"],
+                    datasets: [{
+                        label: "Traffic",
+                        data: [
+                            data.risk_distribution?.normal || 0,
+                            data.risk_distribution?.suspicious || 0,
+                            data.risk_distribution?.attack || 0
+                        ],
+                        backgroundColor: ["#4CAF50", "#FFC107", "#F44336"]
+                    }]
+                },
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // PROTOCOL DISTRIBUTION
+        const protoCtx = document.getElementById("protocolChart")?.getContext("2d");
+
+        if (protoCtx) {
+            protocolChart = new Chart(protoCtx, {
+                type: "doughnut",
+                data: {
+                    labels: Object.keys(data.protocol_distribution || {}),
+                    datasets: [{
+                        data: Object.values(data.protocol_distribution || {}),
+                        backgroundColor: ["#3F51B5", "#009688", "#FF5722", "#4CAF50"]
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // ANOMALY TREND
+        const trendCtx = document.getElementById("trendChart")?.getContext("2d");
+
+        if (trendCtx) {
+            trendChart = new Chart(trendCtx, {
+                type: "line",
+                data: {
+                    labels: data.anomaly_trend?.map((_, i) => i + 1) || [],
+                    datasets: [{
+                        label: "Anomaly Score",
+                        data: data.anomaly_trend || [],
+                        borderColor: "#2196F3",
+                        fill: true
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // TOP IPS
+        const ipCtx = document.getElementById("ipChart")?.getContext("2d");
+
+        if (ipCtx) {
+            ipChart = new Chart(ipCtx, {
+                type: "bar",
+                data: {
+                    labels: Object.keys(data.top_ips || {}),
+                    datasets: [{
+                        label: "Traffic",
+                        data: Object.values(data.top_ips || {}),
+                        backgroundColor: "#9C27B0"
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

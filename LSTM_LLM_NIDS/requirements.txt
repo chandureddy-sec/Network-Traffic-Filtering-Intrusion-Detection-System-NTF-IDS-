@@ -1,0 +1,8 @@
+streamlit>=1.30.0
+tensorflow>=2.15.0
+scapy>=2.5.0
+google-generativeai>=0.3.0
+pandas>=2.1.0
+numpy>=1.26.0
+plotly>=5.18.0
+python-dotenv>=1.0.0
