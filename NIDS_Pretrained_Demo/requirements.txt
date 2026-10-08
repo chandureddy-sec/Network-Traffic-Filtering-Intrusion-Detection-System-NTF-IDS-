@@ -1,0 +1,7 @@
+flask>=3.0
+scapy>=2.5
+numpy>=1.26
+pandas>=2.1
+joblib>=1.3
+# pretrained_model.pkl was saved with scikit-learn 1.8.0; use that version or newer
+scikit-learn>=1.8.0

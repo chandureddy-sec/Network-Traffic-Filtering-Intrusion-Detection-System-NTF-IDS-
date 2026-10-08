@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Secrets and local config
+.env
+
+# Runtime output
+*.db
+*.sqlite3
+mock_lstm_weights.h5
+
+# Dataset (large, download separately) and the synthetic stand-in train.py can write
+NF-BoT-IoT.csv
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
